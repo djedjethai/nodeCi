@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
-const redis = require('redis');
 const requireLogin = require('../middlewares/requireLogin');
 
 const Blog = mongoose.model('Blog');
+
+// set redis
+const redis = require('redis');
 const redisUrl = 'redis://127.0.0.1:6379';
 const client = redis.createClient(redisUrl);
+// if i want to clean redis memory: client.flushall()
+// set the redis client to return promise
 const util = require('util');
 client.get = util.promisify(client.get);
 
@@ -19,21 +23,11 @@ module.exports = app => {
   });
 
   app.get('/api/blogs', requireLogin, async (req, res) => {
-    let cachedBlogs = null;
-    // if data cached in redis
-    // as we declared the util.promisify, 
-    // client.get do not return a callBack any more but a Promise
-    // so we can use aysnc await
-    cachedBlogs = await client.get(req.user.id)
-    // if no data in cache, query db
-    if(cachedBlogs === null) {
-      console.log('SERVING_FROM_DB');
-      cachedBlogs = await Blog.find({ _user: req.user.id });
-    }
-    // save data in cache and return
-    client.set(req.user.id, JSON.stringify(cachedBlogs))
-    res.send(JSON.parse(cachedBlogs));
-  });
+   const blogs = await Blog.find({_user: req.user.id});
+
+   res.send(blogs);
+  })
+
 
   app.post('/api/blogs', requireLogin, async (req, res) => {
     const { title, content } = req.body;
