@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 // set redis
 const redis = require('redis');
 const redisUrl = 'redis://127.0.0.1:6379';
@@ -8,11 +7,19 @@ const client = redis.createClient(redisUrl);
 // set the redis client to return promise
 const util = require('util');
 client.get = util.promisify(client.get);
-
 const exec = mongoose.Query.prototype.exec;
 
-mongoose.Query.prototype.exec = function() {
+mongoose.Query.prototype.cache = function() {
+    this.useCache = true;
+    return this;
+}
+
+mongoose.Query.prototype.exec = async function() {
     console.log('I AM ABOUT TO RUN A QUERRY');
+    if (!this.useCache) {
+        console.log('SKIP-CACHE');
+        return exec.apply(this, arguments);
+    }
 
     // this est une methode des instances de mongoose, 
     // this. fait referance a la methode(Query) qui est appele.
@@ -22,13 +29,35 @@ mongoose.Query.prototype.exec = function() {
 
     // we don t want to modify the object itself, so we assign(), 
     // or could use the spraid operator to copy/clone the object
-    const key = Object.assign({}, this.getQuery(), {
+    // need to stringify as redis store only strings or numbers
+    const key = JSON.stringify(Object.assign({}, this.getQuery(), {
         collection: this.mongooseCollection.name 
-    })
-    console.log(key);
+    }))
+    
+    // SEE IF WE HAVE A KEY
+    const cacheValue = await client.get(key)
 
+
+    // IF WE DO, RETURN THAT
+    if (cacheValue) {
+        console.log('IN_CACHE');
+       const doc = JSON.parse(cacheValue);
+
+        // need to add the mongoose model, 
+        // for the query to ne executed like it come from mongoose
+        return Array.isArray(doc) 
+            ? doc.map(d => new this.model(d))
+            : new this.model(doc);      
+    }
+
+    // OTHERWISE ISSUE A QUERY
     // apply() permet de passer un argument
-    return exec.apply(this, arguments);
+    const result = await exec.apply(this, arguments);
+
+    client.set(key, JSON.stringify(result), '[X', 10);
+    
+    console.log('FROM_DB');
+    return result;
 }
 
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const requireLogin = require('../middlewares/requireLogin');
 
 const Blog = mongoose.model('Blog');
-
+// const Blog = require('../models/Blog');
 
 module.exports = app => {
   app.get('/api/blogs/:id', requireLogin, async (req, res) => {
@@ -15,8 +15,13 @@ module.exports = app => {
   });
 
   app.get('/api/blogs', requireLogin, async (req, res) => {
-   const blogs = await Blog.find({_user: req.user.id});
-
+   
+   // const blogs = await Blog.find({_user: req.user.id});
+   
+   const blogs = await Blog
+                  .find({_user: new mongoose.Types.ObjectId(req.user.id)})
+                  .cache();
+   
    res.send(blogs);
   })
 
