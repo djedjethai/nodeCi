@@ -6,11 +6,17 @@ const client = redis.createClient(redisUrl);
 // if i want to clean redis memory: client.flushall()
 // set the redis client to return promise
 const util = require('util');
-client.get = util.promisify(client.get);
+client.hget = util.promisify(client.hget);
 const exec = mongoose.Query.prototype.exec;
 
-mongoose.Query.prototype.cache = function() {
+mongoose.Query.prototype.cache = function(options = {}) {
     this.useCache = true;
+    // the hashKey (can call it like i want), will be the main key 
+    // of all caches belonging to one user
+    // so wnet this user update, or add info, we will easily delete all his caches 
+
+    // if no option key, the key will be an empty string, rather than undefine
+    this.hashKey = JSON.stringify(options.key || '');
     return this;
 }
 
@@ -35,7 +41,7 @@ mongoose.Query.prototype.exec = async function() {
     }))
     
     // SEE IF WE HAVE A KEY
-    const cacheValue = await client.get(key)
+    const cacheValue = await client.hget(this.hashKey, key)
 
 
     // IF WE DO, RETURN THAT
@@ -44,7 +50,7 @@ mongoose.Query.prototype.exec = async function() {
        const doc = JSON.parse(cacheValue);
 
         // need to add the mongoose model, 
-        // for the query to ne executed like it come from mongoose
+        // for the query to be executed like it come from mongoose
         return Array.isArray(doc) 
             ? doc.map(d => new this.model(d))
             : new this.model(doc);      
@@ -54,7 +60,7 @@ mongoose.Query.prototype.exec = async function() {
     // apply() permet de passer un argument
     const result = await exec.apply(this, arguments);
 
-    client.set(key, JSON.stringify(result), '[X', 10);
+    client.hset(this.hashKey, key, JSON.stringify(result), 'EX', 10);
     
     console.log('FROM_DB');
     return result;
@@ -77,3 +83,9 @@ mongoose.Query.prototype.exec = async function() {
     res.send(blogs);
     client.set(req.user.id, JSON.stringify(blogs));
 */
+
+module.exports = {
+    clearHash(hashKey) {
+        client.del(JSON.stringify(hashKey));
+    }
+}
