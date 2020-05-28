@@ -50,6 +50,14 @@ test('Clicking login start OAuth flow', async () => {
 // to run just a test, we can use: test.only()
 test('When sign in shows logout button', async () => {
     try {
+        // to run automaticly all the auth process, we could implement a new function(method) 
+        // as it s the 'page' class which is calling most of methods, we could add one to this class
+        // like we have done with mongo for redis, 
+        // we should finally end with a call method like this (see page )
+        // page.login();
+
+
+
         // we generate the cookieSession token based from a user's bdd _id
         const user = await userFactory();
         
