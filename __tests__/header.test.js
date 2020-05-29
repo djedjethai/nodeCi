@@ -56,8 +56,6 @@ test('When sign in shows logout button', async () => {
         // we should finally end with a call method like this (see page )
         // page.login();
 
-
-
         // we generate the cookieSession token based from a user's bdd _id
         const user = await userFactory();
         

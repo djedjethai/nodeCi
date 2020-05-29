@@ -111,4 +111,35 @@ const superPage = buildPage();
 superPage.login(); // return "method login"
 superPage.goTo(); // return "method go to"
 
+'==============================================================='
+
+// last step, to make it clear one more step is to set this proxy as static method
+// as customPage is the class we add to custom the ref class 'Page'
+// we set the static method in it
+console.clear();
+class Page {
+  goTo() { console.log('method go to'); };
+  setCookie() { console.log('method set cookie'); };
+};
+
+class CustomPage {
+ static build() {
+  const page = new Page();
+  const custPage = new CustomPage();
+  
+  const proxy = new Proxy(custPage, {
+    get: function (target, property) {
+      return target[property] || page[property];
+    }
+  });
+  return proxy;
+ }
+ login() { console.log('method login'); };
+};
+
+// as we can see calling the CustomPage's static method, 
+// via the Proxy class, we can access the Page's method
+CustomPage.build().setCookie(); // return 'method set cookie'
+const superPage = CustomPage.build();
+superPage.goTo(); // return 'method go to'
 
