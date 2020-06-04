@@ -1,11 +1,7 @@
 const puppeteer = require('puppeteer');
 
-// const userFactory = require('../factories/userFactory');
-// const sessionFactory = require('../factories/sessionFactory');
-
-
-
-// 
+const userFactory = require('../factories/userFactory');
+const sessionFactory = require('../factories/sessionFactory');
 
 class CustomPage {
 
@@ -13,23 +9,33 @@ class CustomPage {
         const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
         
-        const customPage = new CustomPage;
+        const customPage = new CustomPage(page);
 
         const proxy = new Proxy(customPage, {
             get: function(target, property) {
-                return target[property] || page[property] ;
+                return customPage[property] || browser[property] || page[property];
             }
         });
         return proxy;
     }
 
-    login() {
-        const superPage = CustomPage.build();
+    constructor(page) {
+        this.page = page;
+    }
 
-        await superPage.setCookie({ name: 'session', value: session });
-        await superPage.setCookie({ name: 'session.sig', value: sig });
-        await superPage.goto('http://localhost:3000');
-        await superPage.waitFor('a[href="/auth/logout"]');
+    async login() {
+        const user = await userFactory();
+        const { session, sig } = sessionFactory(user);
+
+        this.page.setCookie({ name: 'session', value: session });
+        this.page.setCookie({ name: 'session.sig', value: sig });
+        this.page.goto('http://localhost:3000/blogs');
+        this.page.waitFor('a[href="/auth/logout"]');
+    }
+
+    // do not work....
+    async getContentOf(selector) {
+        return this.page.$eval(selector, el => el.innerHTML);
     }
 }
 

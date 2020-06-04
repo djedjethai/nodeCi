@@ -1,36 +1,36 @@
 /**
  * @jest-environment node
  */
+// we call the proxy, which give access to CustomPage, Page and Browser
+const Page = require('./helpers/page');
 
-const puppeteer = require('puppeteer');
-
-// ne pas oublier de remettre le lien dans le json file 
-const sessionFactory = require('./factories/sessionFactory');
-const userFactory = require('./factories/userFactory');
-
-let browser, page;
+let page;
 
 beforeEach(async () => {
     jest.setTimeout(737027);
-    browser = await puppeteer.launch({
-        headless: false
-    });
-    page = await browser.newPage();
+    // that is now wrap inside the customPage
+    // browser = await puppeteer.launch({
+    //     headless: false
+    // });
+    // page = await browser.newPage();
+
     // config the time out to 0, originaly at 30s wich make the test crash all time
     // await page.setDefaultNavigationTimeout(0);
     // await page.setDefaultTimeout(0);
+    page = await Page.build();
     await page.goto('localhost:3000');
 });
 
 
 test('Header has correct text', async () => { 
     try {
-        const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+        // const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+        const text = await page.getContentOf('a.brand-logo');
         expect(text).toEqual('Blogster');
     } catch (e) {
         console.log(e);
     } finally {
-        await browser.close();
+        await page.close();
     }
 });
 
@@ -42,7 +42,7 @@ test('Clicking login start OAuth flow', async () => {
     } catch (e) {
         console.log(e);
     } finally {
-        await browser.close();
+        await page.close();
     }
 })
 
@@ -57,76 +57,29 @@ test('When sign in shows logout button', async () => {
         // page.login();
 
         // we generate the cookieSession token based from a user's bdd _id
-        const user = await userFactory();
+        // const user = await userFactory();
         
-        const { session, sig } = sessionFactory(user);
+        // const { session, sig } = sessionFactory(user);
     
-        // we change the cookies of the app
-        await page.setCookie({ name: 'session', value: session });
-        await page.setCookie({ name: 'session.sig', value: sig });
-        // we refresh the page for the cookies to be activate
-        await page.goto('http://localhost:3000');
+        // // we change the cookies of the app
+        // await page.setCookie({ name: 'session', value: session });
+        // await page.setCookie({ name: 'session.sig', value: sig });
+        // // we refresh the page for the cookies to be activate
+        // await page.goto('http://localhost:3000');
     
-        // the test is going too fast(the dom don t have enought time to render) 
-        await page.waitFor('a[href="/auth/logout"]');
-    
-        const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML)
+        // // the test is going too fast(the dom don t have enought time to render) 
+        // await page.waitFor('a[href="/auth/logout"]');
+        await page.login();
+        // const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML)
+        const text = await page.getContentOf('a[href="/auth/logout"]');
         expect(text).toEqual('Logout')
     } catch (e) {
         console.log(e);
     } finally {
-        await browser.close();
+        await page.close();
     }
 })
 
 
 
-// beforeEach(async () => {
-//     jest.setTimeout(737027);
-//     browser = await puppeteer.launch({
-//         headless: false
-//     });
-//     page = await browser.newPage();
-//     // config the time out to 0, originaly at 30s wich make the test crash all time
-//     // await page.setDefaultNavigationTimeout(0);
-//     // await page.setDefaultTimeout(0);
-//     await page.goto('localhost:3000');
-// });
-
-
-// afterEach(async () => {
-//     await browser.close();
-// });
-
-// test('Header has correct text', async () => { 
-//     const text = await page.$eval('a.brand-logo', el => el.innerHTML);
-//     expect(text).toEqual('Blogster');
-// });
-
-// test('Clicking login start OAuth flow', async () => {
-//     await page.click('.right a', el => el.innerHTML);
-//     const url = await page.url();
-//     expect(url).toMatch(/accounts\.google\.com/);
-// })
-
-
-// // to run just a test, we can use: test.only()
-// test('When sign in shows logout button', async () => {
-//     // we generate the cookieSession token based from a user's bdd _id
-//     const user = await userFactory();
-    
-//     const { session, sig } = sessionFactory(user);
-
-//     // we change the cookies of the app
-//     await page.setCookie({ name: 'session', value: session });
-//     await page.setCookie({ name: 'session.sig', value: sig });
-//     // we refresh the page for the cookies to be activate
-//     await page.goto('http://localhost:3000');
-
-//     // the test is going too fast(the dom don t have enought time to render) 
-//     await page.waitFor('a[href="/auth/logout"]');
-
-//     const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML)
-//     expect(text).toEqual('Logout')
-// })
 
