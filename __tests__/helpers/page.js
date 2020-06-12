@@ -31,12 +31,13 @@ class CustomPage {
         this.page.setCookie({ name: 'session.sig', value: sig });
         this.page.goto('http://localhost:3000/blogs');
         this.page.waitFor('a[href="/auth/logout"]');
+        // this.page.waitForSelector('a[href="/auth/logout"]');
     }
 
     // do not work....
-    async getContentOf(selector) {
-        return this.page.$eval(selector, el => el.innerHTML);
-    }
+    // async getContentOf(selector) {
+    //     return this.page.$eval(selector, el => el.innerHTML);
+    // }
 }
 
 module.exports = CustomPage;

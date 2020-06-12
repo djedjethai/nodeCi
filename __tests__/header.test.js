@@ -21,6 +21,10 @@ beforeEach(async () => {
     await page.goto('localhost:3000');
 });
 
+// afterEach( async () => {
+//     await page.close();
+// });
+
 
 test('Header has correct text', async () => { 
     try {
