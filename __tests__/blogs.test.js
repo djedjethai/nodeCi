@@ -70,9 +70,21 @@ describe('when logged in', () => {
                 await page.close();
             }
         })
-        // test('submitting then saving adds blog to index page', async () => {
+        test('submitting then saving adds blog to index page', async () => {
+		try {
+			await page.click('form button', el => el.innerHTML);
+			await page.waitFor('.card');
+			const title = await page.getContentOf('.card-content .card-title');
+			const content = await page.getContentOf('.card-content p');
 
-        // })
+			expect(title).toEqual('the title');
+			expect(content).toEqual('the content');
+		} catch (e) {
+
+		} finally {
+			await page.close();
+		}	
+        })
     })
 })
 

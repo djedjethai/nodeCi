@@ -8,7 +8,7 @@ let page;
 
 beforeEach(async () => {
     jest.setTimeout(737027);
-    // that is now wrap inside the customPage
+
     // browser = await puppeteer.launch({
     //     headless: false
     // });
