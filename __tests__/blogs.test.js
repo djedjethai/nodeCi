@@ -85,6 +85,39 @@ describe('when logged in', () => {
 			await page.close();
 		}	
         })
-    })
-})
+    });
+
+});
+
+describe('When user is not logged in', async () => {
+	test('User can not create blod post', async() => {
+		try {
+			const result = await page.evaluate(
+				() => {
+					return fetch('/api/blogs', {
+						method: 'POST',
+						body: JSON.stringify({
+							title: 'My Title',
+							content: 'My Content'
+						}),
+						headers: {
+							'Content-Type':'application/json'
+						},
+						credentials: 'same-origin'
+					})
+					.then(response => {
+						return response.json();
+					})
+				}
+			);
+			expect(result).toEqual({error: 'You must log in!'});
+		} catch (e) {
+
+		} finally {
+			await page.close();
+		};			
+	});
+});
+
+
 
