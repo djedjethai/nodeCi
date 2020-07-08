@@ -38,6 +38,24 @@ class CustomPage {
     // async getContentOf(selector) {
     //     return this.page.$eval(selector, el => el.innerHTML);
     // }
+    
+	get(path) {
+		return this.page.evaluate(
+		      	(_path) => {
+				return fetch(_path, {
+		      			method: 'GET',
+		      			headers: {
+		      				'Content-Type':'application/json'
+		      			},
+		      			credentials: 'same-origin'
+		      		})
+		      		.then(response => {
+		      			return response.json();
+		      		})
+		      	}, path
+		      );
+
+	}
 }
 
 module.exports = CustomPage;
