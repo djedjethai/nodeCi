@@ -90,61 +90,93 @@ describe('when logged in', () => {
 });
 
 describe('When user is not logged in', async () => {
-	test('User can not create blod post', async() => {
-		 try {
-		      const result = await page.evaluate(
-		      	() => {
-		      		return fetch('/api/blogs', {
-		      			method: 'POST',
-		      			body: JSON.stringify({
-		      				title: 'My Title',
-		      				content: 'My Content'
-		      			}),
-		      			headers: {
-		      				'Content-Type':'application/json'
-		      			},
-		      			credentials: 'same-origin'
-		      		})
-		      		.then(response => {
-		      			return response.json();
-		      		})
-		      	}
-		      );
-		      expect(result).toEqual({error: 'You must log in!'});
-		 } catch (e) {
+	const actions = [
+		{
+			method: 'get',
+			path: '/api/blogs'
+		},
+		{
+			method: 'post',
+			path: '/api/blogs',
+			data: {
+				title: 'My Title',
+				content: 'My Content'
+			}
+		}
+	];
 
-		 } finally {
-		 	await page.close();
-		 };			
+	test('Blog related actions are prohibited', async () => {
+		try {
+		 	const result = await page.execRequests(acions);
+			for (let res of result) {
+				expect(res).toEqual({error: 'You must log in!'});		
+			}
+		} catch(e) {
+
+		} finally {
+			await page.close();
+		}
 	});
 
-	test('User can not get blog post', async() => {
-		 try {
-			 const result = await page.get('/api/blogs');
-		      // const result = await page.evaluate(
-		      // 	() => {
-		      // 		return fetch('/api/blogs', {
-                      //                         method: 'GET',
-                      //                         headers: {
-                      //                                 'Content-Type':'application/json'
-                      //                         },  
-                      //                         credentials: 'same-origin'
-                      //                 })  
-                      //                 .then(response => {
-                      //                         return response.json();
-                      //                 })  
 
-		      // 	}
-		      // );
-		      // console.log('le result');
-		      // console.log(result);
-		      expect(result).toEqual({error: 'You must log in!'});
-		 } catch (e) {
+	// these test has been refactor with the above test.
+	// test('User can not create blod post', async() => {
+	// 	 try {
+	// 	      const data = { title: 'My Title', content: 'My Content' }; 
+	// 	      const result = await page.post('/api/blogs', data);
+	// 		// await page.evaluate(
+	// 	      	// 	() => {
+	// 	      	// 	return fetch('/api/blogs', {
+	// 	      	// 		method: 'POST',
+	// 	      	// 		body: JSON.stringify({
+	// 	      	// 			title: 'My Title',
+	// 	      	// 			content: 'My Content'
+	// 	      	// 		}),
+	// 	      	// 		headers: {
+	// 	      	// 			'Content-Type':'application/json'
+	// 	      	// 		},
+	// 	      	// 		credentials: 'same-origin'
+	// 	      	// 	})
+	// 	      	// 	.then(response => {
+	// 	      	// 		return response.json();
+	// 	      	// 	})
+	// 	      	// }
+	// 	      // );
+	// 	      expect(result).toEqual({error: 'You must log in!'});
+	// 	 } catch (e) {
 
-		 } finally {
-		 	await page.close();
-		 }
-	})
+	// 	 } finally {
+	// 	 	await page.close();
+	// 	 };			
+	// });
+
+	// test('User can not get blog post', async() => {
+	// 	 try {
+	// 		 const result = await page.get('/api/blogs');
+	// 	      // const result = await page.evaluate(
+	// 	      // 	() => {
+	// 	      // 		return fetch('/api/blogs', {
+        //               //                         method: 'GET',
+        //               //                         headers: {
+        //               //                                 'Content-Type':'application/json'
+        //               //                         },  
+        //               //                         credentials: 'same-origin'
+        //               //                 })  
+        //               //                 .then(response => {
+        //               //                         return response.json();
+        //               //                 })  
+
+	// 	      // 	}
+	// 	      // );
+	// 	      // console.log('le result');
+	// 	      // console.log(result);
+	// 	      expect(result).toEqual({error: 'You must log in!'});
+	// 	 } catch (e) {
+
+	// 	 } finally {
+	// 	 	await page.close();
+	// 	 }
+	// })
 });
 
 

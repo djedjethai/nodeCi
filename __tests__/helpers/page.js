@@ -52,10 +52,38 @@ class CustomPage {
 		      		.then(response => {
 		      			return response.json();
 		      		})
-		      	}, path
-		      );
+		      	}, path);
 
+	};
+
+	post(path, data) {
+		return this.page.evaluate(
+		      	(_path, _data) => {
+		      		return fetch(_path, {
+		      			method: 'POST',
+		      			body: JSON.stringify(_data),
+		      			headers: {
+		      				'Content-Type':'application/json'
+		      			},
+		      			credentials: 'same-origin'
+		      		})
+		      		.then(response => {
+		      			return response.json();
+		      		})
+
+			},path, data);
+
+	};
+
+	execRequests(actions) {
+		return Promise.all(
+			// this[method] will be this[get] or this[post]
+			// which are the metod of this class, 
+			// so by this way we activate direcly the method
+			actions.map(({method, path, data}) => {
+				return this[method](path, data);
+			})
+		)
 	}
 }
-
 module.exports = CustomPage;
