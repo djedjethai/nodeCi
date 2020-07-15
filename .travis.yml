@@ -1,0 +1,27 @@
+language: node_js
+# version of node
+node_js:
+        - "8"
+# os image distribution for running our ci server (linux image)
+dist: trusty
+services:
+        - mongodb
+        - redis-server
+# that define our environnement keys, link us with the config folder
+env:
+        - NODE_ENV=ci
+# set a cache for travis to cache our node_modules, then it won't have to install it each time
+cache:
+        directories:
+                - node_modules
+                - client/node_modules
+install:
+        - npm install
+        - npm run build
+# run express server in sub-shell
+# wait 3 seconds
+# start the test
+script:
+        - nohup npm run start &
+        - sleep 3
+        - npm run test
