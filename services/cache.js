@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 // set redis
 const redis = require('redis');
-const redisUrl = 'redis://127.0.0.1:6379';
-const client = redis.createClient(redisUrl);
+const keys = require('../config/keys');
+
+const client = redis.createClient(keys.redisUrl);
 // if i want to clean redis memory: client.flushall()
 // set the redis client to return promise
 const util = require('util');

@@ -8,8 +8,9 @@ services:
         - mongodb
         - redis-server
 # that define our environnement keys, link us with the config folder
-env:
-        - NODE_ENV=ci
+env: 
+        - NODE_ENV=ci PORT=3000
+
 # set a cache for travis to cache our node_modules, then it won't have to install it each time
 cache:
         directories:

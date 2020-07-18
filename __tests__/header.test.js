@@ -18,7 +18,7 @@ beforeEach(async () => {
     // await page.setDefaultNavigationTimeout(0);
     // await page.setDefaultTimeout(0);
     page = await Page.build();
-    await page.goto('localhost:3000');
+    await page.goto('http://localhost:3000');
 });
 
 // afterEach( async () => {
