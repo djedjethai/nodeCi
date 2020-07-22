@@ -10,9 +10,6 @@ beforeEach( async () => {
  // afterEach( async () => {
  //     await page.close();
  // });
-//
-//
-//
 
 describe('when logged in', () => {
 
