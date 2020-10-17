@@ -46,13 +46,17 @@ class BlogFormReview extends Component {
     event.preventDefault();
 
     const { submitBlog, history, formValues } = this.props;
-
+    
+    // j ai ca, don t know where this.state.file come from... and is undefined  
     submitBlog(formValues, this.state.file, history);
+    
+    // so lets try that instead, as in the acions/index, this func have only 2 args 
+    // submitBlog(formValues, history);
   }
 
-	onFileChange(event){
-		this.setState({ file: event.target.files[0] });
-	}
+  onFileChange(event){
+	this.setState({ file: event.target.files[0] });
+  }
 
   render() {
     return (
